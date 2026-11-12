@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boka utvecklingssamtal</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #1c2430;
+    --muted: #5d6877;
+    --border: #dde2e8;
+    --accent: #1f5fbf;
+    --accent-text: #ffffff;
+    --accent-soft: #e7effb;
+    --ok: #1e7a46;
+    --ok-soft: #e4f4ea;
+    --err: #b42318;
+    --err-soft: #fdecea;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12161c;
+      --surface: #1b2129;
+      --text: #e8ecf1;
+      --muted: #9aa5b3;
+      --border: #2e3742;
+      --accent: #6aa3f5;
+      --accent-text: #0d1420;
+      --accent-soft: #1e2d44;
+      --ok: #6fd39a;
+      --ok-soft: #173225;
+      --err: #ff8a80;
+      --err-soft: #3a1d1b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.75rem; margin: 0 0 4px; }
+  h2 { font-size: 1.15rem; margin: 0 0 12px; }
+  .lead { color: var(--muted); margin: 0 0 28px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .day + .day { margin-top: 20px; }
+  .day h3 {
+    font-size: .95rem; font-weight: 600; margin: 0 0 10px;
+  }
+  .slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  .slot {
+    text-align: left;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .slot:hover { border-color: var(--accent); }
+  .slot[aria-pressed="true"] {
+    background: var(--accent); color: var(--accent-text); border-color: var(--accent);
+  }
+  .slot .time { display: block; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .slot .mode { display: block; font-size: .8rem; opacity: .8; }
+  label { display: block; font-weight: 600; margin: 14px 0 4px; }
+  .hint { font-weight: 400; color: var(--muted); font-size: .875rem; }
+  input[type="text"], input[type="email"] {
+    width: 100%;
+    padding: 10px 12px;
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  input:focus-visible, .slot:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  fieldset { border: 0; padding: 0; margin: 14px 0 0; }
+  legend { font-weight: 600; padding: 0; margin-bottom: 4px; }
+  .radio { display: inline-flex; align-items: center; gap: 6px; margin-right: 18px; font-weight: 400; }
+  .chosen {
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 4px;
+  }
+  .primary {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    font: inherit; font-weight: 600;
+    color: var(--accent-text);
+    background: var(--accent);
+    border: 0; border-radius: 8px;
+    cursor: pointer;
+  }
+  .primary:disabled { opacity: .6; cursor: progress; }
+  .msg { border-radius: 8px; padding: 12px 14px; margin-top: 16px; }
+  .msg.ok { background: var(--ok-soft); color: var(--ok); }
+  .msg.err { background: var(--err-soft); color: var(--err); }
+  .muted { color: var(--muted); }
+  pre {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; overflow-x: auto; font-size: .85rem; color: var(--text);
+  }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Boka utvecklingssamtal</h1>
+  <p class="lead">Välj en ledig tid och fyll i uppgifterna nedan.</p>
+
+  <section class="card" aria-labelledby="tider-rubrik">
+    <h2 id="tider-rubrik">1. Välj tid</h2>
+    <div id="tider" aria-live="polite"><p class="muted">Hämtar lediga tider …</p></div>
+  </section>
+
+  <section class="card" id="formularkort" hidden aria-labelledby="form-rubrik">
+    <h2 id="form-rubrik">2. Dina uppgifter</h2>
+    <form id="formular" novalidate>
+      <div class="chosen" id="vald-tid"></div>
+
+      <fieldset id="motesform-falt" hidden>
+        <legend>Mötesform</legend>
+        <label class="radio"><input type="radio" name="motesform" value="Fysiskt"> På plats</label>
+        <label class="radio"><input type="radio" name="motesform" value="Digitalt"> Digitalt</label>
+      </fieldset>
+
+      <label for="barn">Barnets namn</label>
+      <input type="text" id="barn" name="barn" autocomplete="off" required>
+
+      <label for="skolmejl">Barnets skolmejl</label>
+      <input type="email" id="skolmejl" name="skolmejl" autocomplete="off" required>
+
+      <label for="vardnadshavare">Din mejladress <span class="hint">(vårdnadshavare – bekräftelsen skickas hit)</span></label>
+      <input type="email" id="vardnadshavare" name="vardnadshavare" autocomplete="email" required>
+
+      <button class="primary" type="submit" id="boka-knapp">Boka tiden</button>
+      <div id="formmeddelande" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section class="card" id="klart" hidden aria-live="polite"></section>
+</main>
+
+<script>
+/* ===== Inställningar ===== */
+
+// Flöde som returnerar lediga tider. Tar emot {"mail": "<lärarens mejl>"}.
+const TIDER_URL = "https://default947897c4c0034f3692b855ac5ab353.54.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/12/workflows/519d933ee4674932a94ed2eb757a7cee/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PoGnX8oYUGkESuMyMVH6I_YoarL5RFe1RpwSFwJjO1c";
+
+// Flöde som bokar en tid. Lämnas tomt tills flödet finns –
+// då visas i stället den JSON som skulle ha skickats (testläge).
+const BOKA_URL = "";
+
+// Lärarens mejl tas från adressen: index.html?larare=fornamn.efternamn@skola.se
+const LARARE = (new URLSearchParams(location.search).get("larare") || "").trim();
+
+const TIDSZON = "Europe/Stockholm";
+
+/* ===== Hjälpfunktioner ===== */
+
+const $ = (id) => document.getElementById(id);
+const fmtDag = new Intl.DateTimeFormat("sv-SE", { timeZone: TIDSZON, weekday: "long", day: "numeric", month: "long" });
+const fmtTid = new Intl.DateTimeFormat("sv-SE", { timeZone: TIDSZON, hour: "2-digit", minute: "2-digit" });
+const dagNyckel = new Intl.DateTimeFormat("sv-SE", { timeZone: TIDSZON, year: "numeric", month: "2-digit", day: "2-digit" });
+
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else e.setAttribute(k, v);
+  }
+  for (const c of children) e.append(c);
+  return e;
+}
+
+const versal = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function tidsintervall(t) {
+  const slut = new Date(t.start.getTime() + t.langd * 60000);
+  return `${fmtTid.format(t.start)}–${fmtTid.format(slut)}`;
+}
+
+function motesformText(t) {
+  if (t.fysiskt && t.digitalt) return "På plats eller digitalt";
+  if (t.fysiskt) return "På plats";
+  if (t.digitalt) return "Digitalt";
+  return "";
+}
+
+async function postJson(url, data) {
+  const svar = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const text = await svar.text();
+  let body = text;
+  try { body = text ? JSON.parse(text) : null; } catch { /* inte JSON */ }
+  return { ok: svar.ok, status: svar.status, body };
+}
+
+/* ===== Lediga tider ===== */
+
+let tider = [];
+let vald = null;
+
+async function hamtaTider() {
+  const ruta = $("tider");
+  if (!LARARE) {
+    ruta.replaceChildren(el("p", { class: "msg err" },
+      "Länken saknar lärarens mejladress. Använd länken du fick från skolan."));
+    return;
+  }
+  ruta.replaceChildren(el("p", { class: "muted" }, "Hämtar lediga tider …"));
+  try {
+    const svar = await postJson(TIDER_URL, { mail: LARARE });
+    if (!svar.ok) throw new Error(`Status ${svar.status}`);
+    let lista = svar.body;
+    if (typeof lista === "string") lista = JSON.parse(lista);
+    if (lista && !Array.isArray(lista)) lista = lista.value || lista.body || [];
+    tider = lista
+      .map((t) => ({
+        id: t.ID,
+        start: new Date(t.Start),
+        langd: parseInt(t.Length, 10) || 0,
+        fysiskt: t.Fysiskt === true || t.Fysiskt === "true",
+        digitalt: t.Digitalt === true || t.Digitalt === "true",
+      }))
+      .filter((t) => !isNaN(t.start) && t.start > new Date())
+      .sort((a, b) => a.start - b.start);
+    visaTider();
+  } catch (e) {
+    console.error(e);
+    ruta.replaceChildren(el("p", { class: "msg err" },
+      "Det gick inte att hämta tiderna just nu. Försök igen om en stund."));
+  }
+}
+
+function visaTider() {
+  const ruta = $("tider");
+  if (!tider.length) {
+    ruta.replaceChildren(el("p", { class: "muted" }, "Det finns inga lediga tider just nu."));
+    $("formularkort").hidden = true;
+    return;
+  }
+  const dagar = new Map();
+  for (const t of tider) {
+    const k = dagNyckel.format(t.start);
+    if (!dagar.has(k)) dagar.set(k, []);
+    dagar.get(k).push(t);
+  }
+  const delar = [];
+  for (const lista of dagar.values()) {
+    const knappar = lista.map((t) => {
+      const b = el("button", { type: "button", class: "slot", "aria-pressed": String(vald?.id === t.id) },
+        el("span", { class: "time" }, tidsintervall(t)),
+        el("span", { class: "mode" }, motesformText(t)));
+      b.addEventListener("click", () => valjTid(t));
+      return b;
+    });
+    delar.push(el("div", { class: "day" },
+      el("h3", {}, versal(fmtDag.format(lista[0].start))),
+      el("div", { class: "slots" }, ...knappar)));
+  }
+  ruta.replaceChildren(...delar);
+}
+
+function valjTid(t) {
+  vald = t;
+  visaTider();
+  $("vald-tid").textContent = `Vald tid: ${fmtDag.format(t.start)} kl. ${tidsintervall(t)}`;
+
+  const falt = $("motesform-falt");
+  const radios = falt.querySelectorAll("input[name=motesform]");
+  radios.forEach((r) => (r.checked = false));
+  if (t.fysiskt && t.digitalt) {
+    falt.hidden = false;
+  } else {
+    falt.hidden = true;
+    const auto = t.fysiskt ? "Fysiskt" : "Digitalt";
+    radios.forEach((r) => (r.checked = r.value === auto));
+  }
+
+  $("formmeddelande").replaceChildren();
+  $("formularkort").hidden = false;
+  $("formularkort").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ===== Bokning ===== */
+
+$("formular").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const meddelande = $("formmeddelande");
+  const form = ev.target;
+  const motesform = form.querySelector("input[name=motesform]:checked")?.value || "";
+
+  if (!vald) return;
+  if (!form.checkValidity()) {
+    meddelande.replaceChildren(el("p", { class: "msg err" }, "Fyll i alla fält med giltiga mejladresser."));
+    form.reportValidity();
+    return;
+  }
+  if (!motesform) {
+    meddelande.replaceChildren(el("p", { class: "msg err" }, "Välj om ni vill ses på plats eller digitalt."));
+    return;
+  }
+
+  const bokning = {
+    ID: vald.id,
+    Larare: LARARE,
+    Barn: form.barn.value.trim(),
+    Skolmejl: form.skolmejl.value.trim(),
+    Vardnadshavare: form.vardnadshavare.value.trim(),
+    Motesform: motesform,
+  };
+
+  // Testläge: inget boknings-API ännu
+  if (!BOKA_URL) {
+    meddelande.replaceChildren(
+      el("p", { class: "msg ok" }, "Testläge – ingen bokning skickades. Så här ser anropet ut:"),
+      el("pre", {}, JSON.stringify(bokning, null, 2)));
+    return;
+  }
+
+  const knapp = $("boka-knapp");
+  knapp.disabled = true;
+  knapp.textContent = "Bokar …";
+  try {
+    const svar = await postJson(BOKA_URL, bokning);
+    if (!svar.ok) {
+      const text = (svar.body && svar.body.message) ||
+        (svar.status === 409 ? "Tiden hann tyvärr bli bokad av någon annan. Välj en annan tid." : "Bokningen gick inte igenom. Försök igen.");
+      meddelande.replaceChildren(el("p", { class: "msg err" }, text));
+      if (svar.status === 409) { vald = null; $("formularkort").hidden = true; hamtaTider(); }
+      return;
+    }
+    $("formularkort").hidden = true;
+    $("tider").closest("section").hidden = true;
+    const klart = $("klart");
+    klart.replaceChildren(
+      el("h2", {}, "Tack, tiden är bokad!"),
+      el("p", {}, `${fmtDag.format(vald.start)} kl. ${tidsintervall(vald)} – ${motesform === "Fysiskt" ? "på plats" : "digitalt"}.`),
+      el("p", { class: "muted" }, `En bekräftelse skickas till ${bokning.Vardnadshavare}.`));
+    klart.hidden = false;
+    klart.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) {
+    console.error(e);
+    meddelande.replaceChildren(el("p", { class: "msg err" }, "Det gick inte att nå bokningstjänsten. Försök igen."));
+  } finally {
+    knapp.disabled = false;
+    knapp.textContent = "Boka tiden";
+  }
+});
+
+hamtaTider();
+</script>
+</body>
+</html>
