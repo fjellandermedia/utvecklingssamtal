@@ -4,11 +4,15 @@ En statisk bokningssida (`index.html`) för GitHub Pages som pratar med två Pow
 
 ## Länk till vårdnadshavare
 
-Lärarens mejladress skickas med i adressen:
+Lärarens mejladress skickas med base64url-kodad i parametern `k`. Varje lärare skapar sin länk på
 
 ```
-https://fjellandermedia.github.io/utvecklingssamtal/?larare=fornamn.efternamn@edu.varnamo.se
+https://fjellandermedia.github.io/utvecklingssamtal/lank.html
 ```
+
+Länken ser ut så här: `https://fjellandermedia.github.io/utvecklingssamtal/?k=Zm9ybmFtbi5lZnRlcm5hbW5AZWR1LnZhcm5hbW8uc2U`
+
+Kodningen gör bara adressen mindre uppenbar. Den skyddar inte på riktigt, eftersom vem som helst kan avkoda base64.
 
 ## Flöde 1 – lediga tider (`TIDER_URL`)
 
