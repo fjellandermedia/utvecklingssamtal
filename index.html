@@ -168,9 +168,9 @@
 // Flöde som returnerar lediga tider. Tar emot {"mail": "<lärarens mejl>"}.
 const TIDER_URL = "https://default947897c4c0034f3692b855ac5ab353.54.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/12/workflows/519d933ee4674932a94ed2eb757a7cee/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PoGnX8oYUGkESuMyMVH6I_YoarL5RFe1RpwSFwJjO1c";
 
-// Flöde som bokar en tid. Lämnas tomt tills flödet finns –
-// då visas i stället den JSON som skulle ha skickats (testläge).
-const BOKA_URL = "";
+// Flöde som bokar en tid. Sätt till "" för testläge
+// (då visas bara den JSON som skulle ha skickats).
+const BOKA_URL = "https://default947897c4c0034f3692b855ac5ab353.54.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/07/workflows/97e967daee6a411294adebc18e1cacc9/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sFsfU4boJqC59DrfzVpl7zq_VHcXoJHwKn1GP1TLMqw";
 
 // Lärarens mejl tas från adressen: index.html?larare=fornamn.efternamn@skola.se
 const LARARE = (new URLSearchParams(location.search).get("larare") || "").trim();
