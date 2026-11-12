@@ -172,16 +172,8 @@ const TIDER_URL = "https://default947897c4c0034f3692b855ac5ab353.54.environment.
 // (då visas bara den JSON som skulle ha skickats).
 const BOKA_URL = "https://default947897c4c0034f3692b855ac5ab353.54.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/07/workflows/97e967daee6a411294adebc18e1cacc9/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sFsfU4boJqC59DrfzVpl7zq_VHcXoJHwKn1GP1TLMqw";
 
-// Lärarens mejl tas från adressen, base64url-kodat: index.html?k=<kod>
-// Skapa länkar med lank.html.
-function avkoda(kod) {
-  try {
-    const b64 = kod.replace(/-/g, "+").replace(/_/g, "/");
-    const bytes = Uint8Array.from(atob(b64 + "===".slice((b64.length + 3) % 4)), (c) => c.charCodeAt(0));
-    return new TextDecoder().decode(bytes);
-  } catch { return ""; }
-}
-const LARARE = avkoda(new URLSearchParams(location.search).get("k") || "").trim();
+// Lärarens mejl tas från adressen: index.html?larare=fornamn.efternamn@skola.se
+const LARARE = (new URLSearchParams(location.search).get("larare") || "").trim();
 
 const TIDSZON = "Europe/Stockholm";
 
