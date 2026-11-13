@@ -82,6 +82,7 @@
   .slot .mode { display: block; font-size: .8rem; opacity: .8; }
   label { display: block; font-weight: 600; margin: 14px 0 4px; }
   .hint { font-weight: 400; color: var(--muted); font-size: .875rem; }
+  .help { color: var(--muted); font-size: .875rem; margin: 6px 0 0; }
   input[type="text"], input[type="email"] {
     width: 100%;
     padding: 10px 12px;
@@ -150,8 +151,9 @@
       <label for="barn">Barnets namn</label>
       <input type="text" id="barn" name="barn" autocomplete="off" required>
 
-      <label for="skolmejl">Barnets skolmejl</label>
-      <input type="email" id="skolmejl" name="skolmejl" autocomplete="off" required>
+      <label for="skolmejl">Barnets skolmejl <span class="hint">(frivilligt)</span></label>
+      <input type="email" id="skolmejl" name="skolmejl" autocomplete="off" aria-describedby="skolmejl-hjalp">
+      <p class="help" id="skolmejl-hjalp">Om du skriver barnets skolmejl får barnet ett meddelande på Teams om utvecklingssamtalet och en bokning i sin kalender.</p>
 
       <label for="vardnadshavare">Din mejladress <span class="hint">(vårdnadshavare – bekräftelsen skickas hit)</span></label>
       <input type="email" id="vardnadshavare" name="vardnadshavare" autocomplete="email" required>

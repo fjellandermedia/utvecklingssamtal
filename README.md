@@ -49,6 +49,8 @@ Anrop (POST, `application/json`):
 }
 ```
 
+`Skolmejl` är frivillig och skickas som tom sträng (`""`) om den inte fylls i. Kontrollera det i flödet innan du skickar Teams-meddelande eller kalenderbokning till barnet, till exempel med `not(empty(triggerBody()?['Skolmejl']))`.
+
 `Motesform` är `"Fysiskt"` eller `"Digitalt"`. Om tiden bara tillåter en mötesform väljs den automatiskt. Om båda är tillåtna får vårdnadshavaren välja.
 
 JSON-schema för triggern "När en HTTP-begäran tas emot":
@@ -64,7 +66,7 @@ JSON-schema för triggern "När en HTTP-begäran tas emot":
     "Vardnadshavare": { "type": "string" },
     "Motesform": { "type": "string" }
   },
-  "required": ["ID", "Larare", "Barn", "Skolmejl", "Vardnadshavare", "Motesform"]
+  "required": ["ID", "Larare", "Barn", "Vardnadshavare", "Motesform"]
 }
 ```
 
