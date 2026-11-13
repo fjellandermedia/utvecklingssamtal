@@ -21,8 +21,14 @@ Anrop (POST, `application/json`):
 Svar: en array med lediga tider:
 
 ```json
-[{ "Start": "2026-11-23T05:00:00Z", "Length": "15", "ID": 26972, "Fysiskt": false, "Digitalt": true }]
+[{
+  "Start": "2026-11-23T05:00:00Z", "Length": "15", "ID": 26972, "Fysiskt": false, "Digitalt": true,
+  "Mentornamn": "Förnamn Efternamn", "Mentormejl": "fornamn.efternamn@edu.varnamo.se",
+  "Klasser": [{ "Id": 9621, "Value": "EK26A" }]
+}]
 ```
+
+Sidan visar `Mentornamn` och alla unika `Klasser` (fältet `Value`) överst. Om svaret är inslaget i `{"body": [...]}` plockas listan ut automatiskt.
 
 `Start` ska vara i UTC. Sidan visar tiden i svensk tid och döljer tider som redan har passerat.
 

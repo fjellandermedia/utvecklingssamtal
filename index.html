@@ -47,6 +47,7 @@
   h1 { font-size: 1.75rem; margin: 0 0 4px; }
   h2 { font-size: 1.15rem; margin: 0 0 12px; }
   .lead { color: var(--muted); margin: 0 0 28px; }
+  .mentor { margin: 0 0 4px; font-weight: 600; }
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -127,6 +128,7 @@
 <body>
 <main>
   <h1>Boka utvecklingssamtal</h1>
+  <p class="mentor" id="mentor" hidden></p>
   <p class="lead">Välj en ledig tid och fyll i uppgifterna nedan.</p>
 
   <section class="card" aria-labelledby="tider-rubrik">
@@ -238,6 +240,7 @@ async function hamtaTider() {
     let lista = svar.body;
     if (typeof lista === "string") lista = JSON.parse(lista);
     if (lista && !Array.isArray(lista)) lista = lista.value || lista.body || [];
+    visaMentor(lista);
     tider = lista
       .map((t) => ({
         id: t.ID,
@@ -254,6 +257,27 @@ async function hamtaTider() {
     ruta.replaceChildren(el("p", { class: "msg err" },
       "Det gick inte att hämta tiderna just nu. Försök igen om en stund."));
   }
+}
+
+// Mentor och klasser är samma på alla tider – plocka dem från svaret.
+let mentornamn = "";
+function visaMentor(lista) {
+  mentornamn = lista.find((t) => t.Mentornamn)?.Mentornamn || "";
+  const klasser = new Set();
+  for (const t of lista) {
+    const k = t.Klasser;
+    const poster = Array.isArray(k) ? k : k ? [k] : [];
+    for (const x of poster) {
+      const namn = typeof x === "string" ? x : x?.Value;
+      if (namn) klasser.add(namn);
+    }
+  }
+  const delar = [];
+  if (mentornamn) delar.push(`Mentor: ${mentornamn}`);
+  if (klasser.size) delar.push(`${klasser.size > 1 ? "Klasser" : "Klass"}: ${[...klasser].sort().join(", ")}`);
+  const rad = $("mentor");
+  rad.textContent = delar.join(" · ");
+  rad.hidden = !delar.length;
 }
 
 function visaTider() {
@@ -359,7 +383,7 @@ $("formular").addEventListener("submit", async (ev) => {
     const klart = $("klart");
     klart.replaceChildren(
       el("h2", {}, "Tack, tiden är bokad!"),
-      el("p", {}, `${fmtDag.format(vald.start)} kl. ${tidsintervall(vald)} – ${motesform === "Fysiskt" ? "på plats" : "digitalt"}.`),
+      el("p", {}, `${versal(fmtDag.format(vald.start))} kl. ${tidsintervall(vald)} – ${motesform === "Fysiskt" ? "på plats" : "digitalt"}${mentornamn ? ` med ${mentornamn}` : ""}.`),
       el("p", { class: "muted" }, `En bekräftelse skickas till ${bokning.Vardnadshavare}.`));
     klart.hidden = false;
     klart.scrollIntoView({ behavior: "smooth", block: "start" });
