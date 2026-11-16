@@ -10,7 +10,7 @@ Lärarens kod skickas med i adressen:
 https://fjellandermedia.github.io/utvecklingssamtal/?Lv56XAASJW
 ```
 
-Koden efter `?` skickas vidare till flödena: som `mail` till tidsflödet och som `Larare` till bokningsflödet. Det går också att skriva `?kod=Lv56XAASJW`, och gamla länkar med `?larare=` fungerar fortfarande.
+Koden efter `?` skickas som `mail` till tidsflödet. Vid bokning skickas i stället `Mentormejl` från tidsflödets svar som `Larare`. Det går också att skriva `?kod=Lv56XAASJW`, och gamla länkar med `?larare=` fungerar fortfarande.
 
 ## Flöde 1 – lediga tider (`TIDER_URL`)
 

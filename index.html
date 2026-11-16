@@ -180,7 +180,8 @@ const BOKA_URL = "https://default947897c4c0034f3692b855ac5ab353.54.environment.a
 //   ?Lv56XAASJW         (rekommenderas)
 //   ?kod=Lv56XAASJW
 //   ?larare=Lv56XAASJW  (gamla länkar)
-// Koden skickas till tidsflödet som {"mail": "<kod>"} och till bokningen som "Larare".
+// Koden skickas till tidsflödet som {"mail": "<kod>"}. Vid bokning skickas
+// "Mentormejl" från tidsflödets svar som "Larare".
 function lasKod() {
   const sok = location.search.slice(1);
   const q = new URLSearchParams(sok);
@@ -263,6 +264,7 @@ async function hamtaTider() {
         langd: parseInt(t.Length, 10) || 0,
         fysiskt: t.Fysiskt === true || t.Fysiskt === "true",
         digitalt: t.Digitalt === true || t.Digitalt === "true",
+        mentormejl: (t.Mentormejl || "").trim(),
       }))
       .filter((t) => !isNaN(t.start) && t.start > new Date())
       .sort((a, b) => a.start - b.start);
@@ -276,8 +278,10 @@ async function hamtaTider() {
 
 // Mentor och klasser är samma på alla tider – plocka dem från svaret.
 let mentornamn = "";
+let mentormejl = "";
 function visaMentor(lista) {
   mentornamn = lista.find((t) => t.Mentornamn)?.Mentornamn || "";
+  mentormejl = (lista.find((t) => t.Mentormejl)?.Mentormejl || "").trim();
   const klasser = new Set();
   for (const t of lista) {
     const k = t.Klasser;
@@ -366,7 +370,7 @@ $("formular").addEventListener("submit", async (ev) => {
 
   const bokning = {
     ID: vald.id,
-    Larare: LARARE,
+    Larare: vald.mentormejl || mentormejl,
     Barn: form.barn.value.trim(),
     Skolmejl: form.skolmejl.value.trim(),
     Vardnadshavare: form.vardnadshavare.value.trim(),
