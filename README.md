@@ -4,11 +4,13 @@ En statisk bokningssida (`index.html`) för GitHub Pages som pratar med två Pow
 
 ## Länk till vårdnadshavare
 
-Lärarens mejladress skickas med i adressen:
+Lärarens kod skickas med i adressen:
 
 ```
-https://fjellandermedia.github.io/utvecklingssamtal/?larare=fornamn.efternamn@edu.varnamo.se
+https://fjellandermedia.github.io/utvecklingssamtal/?Lv56XAASJW
 ```
+
+Koden efter `?` skickas vidare till flödena: som `mail` till tidsflödet och som `Larare` till bokningsflödet. Det går också att skriva `?kod=Lv56XAASJW`, och gamla länkar med `?larare=` fungerar fortfarande.
 
 ## Flöde 1 – lediga tider (`TIDER_URL`)
 

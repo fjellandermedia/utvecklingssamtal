@@ -176,8 +176,21 @@ const TIDER_URL = "https://default947897c4c0034f3692b855ac5ab353.54.environment.
 // (då visas bara den JSON som skulle ha skickats).
 const BOKA_URL = "https://default947897c4c0034f3692b855ac5ab353.54.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/07/workflows/97e967daee6a411294adebc18e1cacc9/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sFsfU4boJqC59DrfzVpl7zq_VHcXoJHwKn1GP1TLMqw";
 
-// Lärarens mejl tas från adressen: index.html?larare=fornamn.efternamn@skola.se
-const LARARE = (new URLSearchParams(location.search).get("larare") || "").trim();
+// Lärarens kod tas från adressen. Fungerar som
+//   ?Lv56XAASJW         (rekommenderas)
+//   ?kod=Lv56XAASJW
+//   ?larare=Lv56XAASJW  (gamla länkar)
+// Koden skickas till tidsflödet som {"mail": "<kod>"} och till bokningen som "Larare".
+function lasKod() {
+  const sok = location.search.slice(1);
+  const q = new URLSearchParams(sok);
+  const namngiven = q.get("kod") || q.get("larare");
+  if (namngiven) return namngiven.trim();
+  const forsta = sok.split("&")[0];
+  if (forsta && !forsta.includes("=")) return decodeURIComponent(forsta).trim();
+  return "";
+}
+const LARARE = lasKod();
 
 const TIDSZON = "Europe/Stockholm";
 
@@ -232,7 +245,7 @@ async function hamtaTider() {
   const ruta = $("tider");
   if (!LARARE) {
     ruta.replaceChildren(el("p", { class: "msg err" },
-      "Länken saknar lärarens mejladress. Använd länken du fick från skolan."));
+      "Länken är ofullständig. Använd länken du fick från skolan."));
     return;
   }
   ruta.replaceChildren(el("p", { class: "muted" }, "Hämtar lediga tider …"));
